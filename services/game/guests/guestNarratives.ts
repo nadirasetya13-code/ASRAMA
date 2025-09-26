@@ -1,0 +1,7 @@
+export const narratives: string[] = [
+    "Pernikahanku sudah di ujung tanduk. Istriku dingin, rumah terasa seperti kuburan. Aku datang ke sini bukan untuk cinta, tapi untuk merasakan kembali kehangatan tubuh yang sudah lama hilang, untuk membuktikan pada diriku sendiri bahwa aku masih seorang pria.",
+    "Setiap hari aku memimpin ratusan karyawan, mengambil keputusan bernilai miliaran. Tekanan ini membunuhku perlahan. Di sini, aku bisa melepaskan topeng kekuasaan itu. Aku hanya ingin satu malam di mana aku tidak perlu berpikir, hanya merasakan.",
+    "Aku baru saja dicampakkan oleh tunanganku. Dia bilang aku 'terlalu baik' dan 'membosankan'. Aku perlu membuktikan dia salah. Aku ingin merasakan sisi liar dari kehidupan, melakukan sesuatu yang tidak akan pernah kulakukan sebelumnya. Aku ingin hancur, lalu membangun diriku kembali.",
+    "Aku adalah seorang duda. Putriku sudah dewasa dan akan segera menikah. Rumah akan menjadi sangat sepi. Aku tidak mencari pengganti istriku, itu mustahil. Aku hanya mencari teman bicara, seseorang yang bisa mengisi kekosongan di malam hari, walau hanya untuk sementara.",
+    "Karierku hancur karena skandal. Aku kehilangan segalanya: pekerjaan, teman, harga diri. Aku datang ke sini karena aku sudah tidak peduli lagi. Aku ingin merasakan sensasi paling dasar dari kehidupan, sesuatu yang tidak bisa diambil dariku, sebelum aku memutuskan apa yang akan kulakukan selanjutnya.",
+];

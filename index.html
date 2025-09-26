@@ -1,0 +1,162 @@
+<!DOCTYPE html>
+<html lang="id">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>ASRAMA BIRAHI</title>
+    
+    <!-- SEO & PWA Meta Tags -->
+    <meta name="description" content="Sebuah game simulasi manajemen talenta romantis dengan kearifan lokal Indonesia. Jodohkan talenta unik dengan tamu terhormat untuk menciptakan momen tak terlupakan dan bangun agensi asmaramu." />
+    <link rel="manifest" href="/metadata.json" />
+    <meta name="theme-color" content="#1e1c2f" />
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>💖</text></svg>">
+
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700&family=Montserrat:wght@400;500;700&display=swap" rel="stylesheet">
+    <script>
+      tailwind.config = {
+        theme: {
+          extend: {
+            fontFamily: {
+              'serif': ['"Playfair Display"', 'serif'],
+              'sans': ['"Montserrat"', 'sans-serif'],
+            },
+            colors: {
+              'brand-pink': '#f7c5cc',
+              'brand-purple': '#a8a4e1',
+              'brand-gold': '#f5d68f',
+              'brand-dark': '#4a4a4a', // Deprecated, use light text on dark bg
+              'dark-primary': '#141320',
+              'dark-secondary': '#1e1c2f',
+              'dark-tertiary': '#2d2a3f',
+              'light-text': '#e5e7eb',
+              'subtle-text': '#9ca3af',
+            },
+            boxShadow: {
+              'romantic': '0 10px 25px -5px rgba(247, 197, 204, 0.4), 0 8px 10px -6px rgba(247, 197, 204, 0.2)',
+            },
+            animation: {
+              'gradient-pulse': 'gradient-pulse 15s ease infinite',
+              'shimmer': 'shimmer 4s infinite',
+              'slow-pulse': 'slow-pulse 4s cubic-bezier(0.4, 0, 0.6, 1) infinite',
+              'glow-purple': 'glow-purple 2.5s ease-in-out infinite',
+              'glow-gold': 'glow-gold 2s infinite alternate',
+              'glow-blue': 'glow-blue 2.5s ease-in-out infinite',
+              'glow-teal': 'glow-teal 2.5s ease-in-out infinite',
+              'glow-pink': 'glow-pink 2.5s ease-in-out infinite',
+              'glow-red': 'glow-red 2.5s ease-in-out infinite',
+              'glow-mystic': 'glow-mystic 2.5s ease-in-out infinite',
+              'glow-white': 'glow-white 3s ease-in-out infinite',
+              'orb-pulse': 'orb-pulse 3s cubic-bezier(0.4, 0, 0.6, 1) infinite',
+              'rarity-flash': 'rarity-flash 0.5s ease-out forwards',
+              'summon-pulse': 'summon-pulse 3s ease-in-out infinite',
+              'gacha-rarity-flash': 'gacha-rarity-flash 0.5s ease-out forwards',
+            },
+            keyframes: {
+              'gradient-pulse': {
+                '0%, 100%': { backgroundPosition: '0% 50%' },
+                '50%': { backgroundPosition: '100% 50%' },
+              },
+              'shimmer': {
+                 '0%': { backgroundPosition: '-200% center' },
+                 '100%': { backgroundPosition: '200% center' },
+              },
+              'slow-pulse': {
+                '0%, 100%': { opacity: 0.15, transform: 'scale(1)' },
+                '50%': { opacity: 0.3, transform: 'scale(1.1)' },
+              },
+              'glow-purple': {
+                '0%, 100%': { 'box-shadow': '0 0 5px #ec4899, 0 0 10px #ec4899, 0 0 15px #d946ef, 0 0 20px #d946ef' },
+                '50%': { 'box-shadow': '0 0 10px #ec4899, 0 0 20px #d946ef, 0 0 30px #a855f7, 0 0 40px #a855f7' },
+              },
+              'glow-gold': {
+                '0%, 100%': { 'box-shadow': '0 0 5px rgba(255, 215, 0, 0.5), 0 0 10px rgba(255, 215, 0, 0.3)' },
+                '50%': { 'box-shadow': '0 0 15px rgba(255, 215, 0, 0.8), 0 0 25px rgba(255, 215, 0, 0.6)' },
+              },
+              'glow-blue': {
+                '0%, 100%': { 'box-shadow': '0 0 5px #60a5fa, 0 0 10px #3b82f6, 0 0 15px #2563eb' },
+                '50%': { 'box-shadow': '0 0 10px #3b82f6, 0 0 20px #2563eb, 0 0 30px #1d4ed8' },
+              },
+              'glow-teal': {
+                '0%, 100%': { 'box-shadow': '0 0 5px #5eead4, 0 0 10px #2dd4bf, 0 0 15px #14b8a6' },
+                '50%': { 'box-shadow': '0 0 10px #2dd4bf, 0 0 20px #14b8a6, 0 0 30px #0d9488' },
+              },
+              'glow-pink': {
+                '0%, 100%': { 'box-shadow': '0 0 5px #f9a8d4, 0 0 10px #f472b6, 0 0 15px #ec4899' },
+                '50%': { 'box-shadow': '0 0 10px #f472b6, 0 0 20px #ec4899, 0 0 30px #db2777' },
+              },
+              'glow-red': {
+                '0%, 100%': { 'box-shadow': '0 0 5px #fca5a5, 0 0 10px #f87171, 0 0 15px #ef4444' },
+                '50%': { 'box-shadow': '0 0 10px #f87171, 0 0 20px #ef4444, 0 0 30px #dc2626' },
+              },
+              'glow-mystic': {
+                '0%, 100%': { 'box-shadow': '0 0 8px #FFD700, 0 0 15px #4B0082' },
+                '50%': { 'box-shadow': '0 0 12px #FFD700, 0 0 25px #FFD700, 0 0 45px #4B0082' },
+              },
+              'glow-white': {
+                '0%, 100%': { 'box-shadow': '0 0 5px #ffffff, 0 0 10px #e5e7eb, 0 0 15px #d1d5db' },
+                '50%': { 'box-shadow': '0 0 10px #e5e7eb, 0 0 20px #d1d5db, 0 0 30px #9ca3af' },
+              },
+              'orb-pulse': {
+                '0%, 100%': { transform: 'scale(1)', opacity: '0.7' },
+                '50%': { transform: 'scale(1.05)', opacity: '1' },
+              },
+              'rarity-flash': {
+                '0%': { 'box-shadow': 'inset 0 0 0 0 rgba(255,255,255,0.7)', opacity: 1 },
+                '50%': { 'box-shadow': 'inset 0 0 25px 15px var(--flash-color)', opacity: 1 },
+                '100%': { 'box-shadow': 'inset 0 0 0 0 rgba(255,255,255,0.7)', opacity: 1 },
+              },
+              'summon-pulse': {
+                '0%, 100%': { transform: 'scale(0.95)', opacity: '0.9' },
+                '50%': { transform: 'scale(1.05)', opacity: '1' },
+              },
+              'gacha-rarity-flash': {
+                '0%': { 
+                    boxShadow: '0 0 5px 2px var(--flash-color), inset 0 0 5px 2px var(--flash-color)',
+                    transform: 'scale(1)',
+                    opacity: 1
+                },
+                '50%': { 
+                    boxShadow: '0 0 30px 10px var(--flash-color), inset 0 0 10px 4px var(--flash-color)',
+                    transform: 'scale(1.1)',
+                    opacity: 1
+                },
+                '100%': { 
+                    boxShadow: '0 0 5px 2px var(--flash-color), inset 0 0 5px 2px var(--flash-color)',
+                    transform: 'scale(1)',
+                    opacity: 1
+                },
+              },
+            }
+          }
+        }
+      }
+    </script>
+  <script type="importmap">
+{
+  "imports": {
+    "react": "https://aistudiocdn.com/react@^19.1.1",
+    "react-dom/": "https://aistudiocdn.com/react-dom@^19.1.1/",
+    "react/": "https://aistudiocdn.com/react@^19.1.1/",
+    "idb": "https://cdn.jsdelivr.net/npm/idb@7/build/index.js",
+    "zustand": "https://aistudiocdn.com/zustand@^4.5.4",
+    "framer-motion": "https://cdn.jsdelivr.net/npm/framer-motion@11.2.10/dist/es/index.mjs",
+    "@testing-library/jest-dom": "https://aistudiocdn.com/@testing-library/jest-dom@^6.8.0",
+    "vitest": "https://aistudiocdn.com/vitest@^3.2.4",
+    "vitest/": "https://aistudiocdn.com/vitest@^3.2.4/"
+  }
+}
+</script>
+</head>
+  <body class="bg-dark-primary font-sans text-light-text">
+    <div id="root"></div>
+    <noscript>
+      <div style="display: flex; justify-content: center; align-items: center; height: 100vh; text-align: center; font-family: sans-serif; padding: 1rem; color: white;">
+        <p>Anda perlu mengaktifkan JavaScript untuk menjalankan aplikasi ini. Silakan aktifkan JavaScript di pengaturan browser Anda.</p>
+      </div>
+    </noscript>
+    <script type="module" src="./index.tsx"></script>
+  </body>
+</html>

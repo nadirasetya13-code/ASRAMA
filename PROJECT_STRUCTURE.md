@@ -55,6 +55,7 @@ Berisi semua komponen UI React yang dapat digunakan kembali.
 | `LivestreamPackageModal.tsx`| Modal memilih paket data livestream. |
 | `LivestreamTopicModal.tsx`| Modal memilih topik siaran. |
 | `LivestreamResultModal.tsx`| Modal hasil sesi livestream. |
+| `MainMenu.tsx` | Tampilan menu utama dengan latar belakang video, hanya terlihat saat di Main Menu. |
 | `MakamTalentaView.tsx`| Tampilan melihat dan mereinkarnasi talenta. |
 | `MatchResultModal.tsx` | Modal hasil dan dampak sesi. |
 | `ModalManager.tsx` | Me-render semua modal global. |
@@ -69,6 +70,7 @@ Berisi semua komponen UI React yang dapat digunakan kembali.
 | `RekrutView.tsx`| Tampilan rekrutmen dengan tab Gacha Talenta & Equipment. |
 | `SatpolPpRaidModal.tsx`| Modal untuk event Razia Satpol-PP. |
 | `SessionProcessingModal.tsx` | Tampilan sinematik narasi sesi. |
+| `SideMenu.tsx` | Menu samping untuk navigasi sekunder (Toko, Panggil, dll.), hanya terlihat saat di Main Menu. |
 | `TalentCard.tsx` | Kartu ringkasan talenta. |
 | `TalentShowcase.tsx` | Carousel talenta unggulan di menu Rekrut. |
 | `TalentProfile.tsx` | **Orchestrator** untuk profil talenta. |

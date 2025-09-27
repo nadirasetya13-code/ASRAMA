@@ -6,17 +6,17 @@ export const TALENT_HIBERNATION_DURATION_MS = 3 * 60 * 60 * 1000; // 3 hours in 
 export const REINCARNATION_COST = 25000000;
 export const REINCARNATION_STAT_BONUS = 2; // +2 to base Kecantikan & Stamina per reincarnation
 
-// --- NEW: TALENT CREATOR POINT BUDGET ---
-// Total Attribute Points (TAP) available for distribution based on rarity.
-export const TALENT_ATTRIBUTE_BUDGET: Record<Rarity, number> = {
-  Biasa: 2100,
-  Rare: 2400,
-  Epic: 2800,
-  Legendary: 3200,
-  Event: 3600,
-  Khusus: 4000,
-  Special: 4400,
-  Mystic: 5000,
+// --- NEW: TALENT CREATOR RARITY STAT CAPS ---
+// Maximum value for any single attribute at creation, based on rarity.
+export const TALENT_CREATOR_RARITY_STAT_CAP: Record<Rarity, number> = {
+  Biasa: 10,
+  Rare: 20,
+  Epic: 30,
+  Legendary: 40,
+  Event: 50,
+  Khusus: 60,
+  Special: 70,
+  Mystic: 80,
 };
 
 

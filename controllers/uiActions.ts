@@ -146,7 +146,7 @@ export const createUiActionsSlice: StoreSlice<UiActions> = (set, get) => ({
     try {
       set({
         loadingProgress: 10,
-        loadingMessage: 'Mengambil data dari database...',
+        loadingMessage: 'Mengakses database lokal...',
       });
       const [
         savedGameState,
@@ -161,7 +161,10 @@ export const createUiActionsSlice: StoreSlice<UiActions> = (set, get) => ({
         db.getRooms(),
         db.getUserCreatedTalents(),
       ]);
-      set({ loadingProgress: 20, loadingMessage: 'Memproses data game...' });
+      set({
+        loadingProgress: 20,
+        loadingMessage: 'Memvalidasi data tersimpan...',
+      });
 
       const combinedGachaPool = [...baseTalents, ...userCreatedTalents];
       set({ gachaTalentPool: combinedGachaPool });
@@ -170,7 +173,12 @@ export const createUiActionsSlice: StoreSlice<UiActions> = (set, get) => ({
       let finalGuests: Guest[];
       let finalGameState: GameState;
 
-      if (savedGameState && savedTalents.length > 0 && savedRooms.length > 0) {
+      // Data validation and fallback logic
+      const isDataValid =
+        savedGameState && savedTalents.length > 0 && savedRooms.length > 0;
+
+      if (isDataValid) {
+        set({ loadingMessage: 'Memuat progres tersimpan...' });
         finalTalents = savedTalents;
         finalGuests =
           savedGameState.gameTime.phase === 'Malam' ? savedGuests : [];
@@ -182,6 +190,18 @@ export const createUiActionsSlice: StoreSlice<UiActions> = (set, get) => ({
           ),
         };
       } else {
+        if (savedGameState) {
+          // If some data exists but is inconsistent
+          set({
+            loadingMessage: 'Data korup terdeteksi, memulai game baru...',
+          });
+          console.warn(
+            'Inconsistent data found in DB. Resetting to initial state.'
+          );
+        } else {
+          set({ loadingMessage: 'Memulai petualangan baru...' });
+        }
+
         const { INITIAL_GAME_STATE } = await import('../constants');
         finalTalents = generateTalents();
         finalGuests = [];
@@ -191,6 +211,7 @@ export const createUiActionsSlice: StoreSlice<UiActions> = (set, get) => ({
             INITIAL_GAME_STATE.level
           ),
         };
+        // Save the fresh state to the DB
         // eslint-disable-next-line @typescript-eslint/no-unused-vars
         const { rooms: _rooms, ...gameStateToSave } = finalGameState;
         await db.saveGameState(gameStateToSave);
@@ -199,7 +220,10 @@ export const createUiActionsSlice: StoreSlice<UiActions> = (set, get) => ({
         await db.saveRooms(finalGameState.rooms);
       }
 
-      set({ loadingProgress: 25, loadingMessage: 'Mengumpulkan aset...' });
+      set({
+        loadingProgress: 30,
+        loadingMessage: 'Mengumpulkan aset visual...',
+      });
 
       // Collect image URLs
       const imageUrlsToLoad = new Set<string>();
@@ -253,11 +277,12 @@ export const createUiActionsSlice: StoreSlice<UiActions> = (set, get) => ({
         set({ loadingMessage: assetName });
       };
 
-      // Preload images (scaled to 25% -> 80% of progress bar)
+      set({ loadingProgress: 40 });
+      // Preload images (scaled to 40% -> 80% of progress bar)
       await preloadImages(
         Array.from(imageUrlsToLoad),
         (progress) => {
-          set({ loadingProgress: 25 + progress * 0.55 });
+          set({ loadingProgress: 40 + progress * 0.4 });
         },
         onAssetLoad
       );
@@ -284,13 +309,22 @@ export const createUiActionsSlice: StoreSlice<UiActions> = (set, get) => ({
       get().initializeCleaningTimers();
       set({ loadingProgress: 100 });
     } catch (error) {
-      console.error('Failed to load game data:', error);
-      set({ loading: false }); // Stop loading on error
+      console.error('Gagal memuat data game dari IndexedDB:', error);
+      const errorMessage =
+        'Gagal memuat database. Pastikan browser Anda tidak dalam mode private dan izinkan penyimpanan data. Coba muat ulang halaman.';
+      set({
+        loading: true,
+        loadingError: errorMessage,
+        loadingMessage: errorMessage,
+        loadingProgress: 50,
+      });
     } finally {
-      // Delay hiding the loading screen to show the 100% complete bar
-      setTimeout(() => {
-        set({ loading: false });
-      }, 500);
+      // Don't hide loading screen on error.
+      if (!get().loadingError) {
+        setTimeout(() => {
+          set({ loading: false });
+        }, 500);
+      }
     }
   },
   initializeCleaningTimers: () => {

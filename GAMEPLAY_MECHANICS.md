@@ -75,7 +75,11 @@ Ini adalah sistem *end-game* utama untuk kustomisasi talenta.
 Ini adalah sistem dinamis yang berjalan di latar belakang, dipicu oleh aksi pemain.
 
 ### 5.1. Tahap 1: Penggerebekan Warga (Citizen Raid)
--   **Pemicu**: `Kecurigaan Warga` mencapai **100 poin**. Poin ini terakumulasi dari sesi dengan kepuasan rendah, tamu dengan sifat 'Kasar', atau kink 'Dominasi'.
+-   **Pemicu**: `Kecurigaan Warga` mencapai **100 poin**. Poin ini terakumulasi dari berbagai sumber:
+    -   Sesi dengan **kepuasan rendah** (di bawah 40%).
+    -   Melayani tamu dengan sifat **'Kasar'**.
+    -   Melayani tamu dengan kink **'Dominasi'**.
+    -   **Reputasi agensi yang rendah** (di bawah 30).
 -   **Proses**: Saat `endDay` dipicu, modal **Raid Warga** akan muncul. Pemain harus memilih satu dari tiga opsi:
     1.  **Sogok**: Biaya persentase dari Uang Kas. Peluang berhasil dipengaruhi level agensi.
     2.  **Negosiasi**: Mengirim talenta dengan `Mental` tertinggi. Tanpa biaya, tapi berisiko.
@@ -83,14 +87,21 @@ Ini adalah sistem dinamis yang berjalan di latar belakang, dipicu oleh aksi pema
 -   **Konsekuensi Kegagalan**: Asrama disegel selama beberapa hari, denda, reputasi anjlok, semua talenta trauma (tidak tersedia), dan `Laporan Resmi` ke Satpol-PP meningkat drastis.
 
 ### 5.2. Tahap 2: Razia Satpol-PP
--   **Pemicu**: `Laporan Resmi` mencapai **100 poin**. Poin ini terakumulasi dari kegagalan Raid Warga atau dari sesi dengan tamu 'Penyebar Penyakit'.
+-   **Pemicu**: `Laporan Resmi` mencapai **100 poin**. Poin ini terakumulasi dari:
+    -   **Kegagalan** saat menghadapi Penggerebekan Warga.
+    -   Melayani tamu dengan sifat **'Penyebar Penyakit'** (kontribusi terbesar).
+    -   Melayani tamu dengan sifat **'Kasar'**.
+    -   Melayani tamu dengan kink **'Dominasi'**.
 -   **Proses**: Saat `endDay`, modal **Razia Satpol-PP** akan muncul. Pemain diberi dua pilihan:
     1.  **Bayar Denda**: Membayar denda besar dari **Tabungan** untuk mengurangi durasi penyegelan.
     2.  **Terima Konsekuensi**: Menolak bayar, menerima durasi penyegelan yang lebih lama.
 -   **Konsekuensi**: Asrama disegel, reputasi anjlok, dan agensi memasuki status **"Dalam Pengawasan"** selama 14 hari, yang menggandakan perolehan poin `Kecurigaan`. Kasus juga dilimpahkan ke Polisi, mengaktifkan `Penyelidikan Polisi`.
 
 ### 5.3. Tahap 3: Penggerebekan Polisi
--   **Pemicu**: `Penyelidikan Polisi` mencapai **100 poin**. Poin ini terakumulasi dari pelimpahan kasus Satpol-PP, skandal *Doxxing*, atau sesi berisiko tinggi saat "Dalam Pengawasan".
+-   **Pemicu**: `Penyelidikan Polisi` mencapai **100 poin**. Status `Penyelidikan Polisi` menjadi aktif setelah kasus dilimpahkan oleh Satpol-PP. Setelah aktif, poin terakumulasi dari:
+    -   **Skandal Doxxing** dari Produksi Konten (kontribusi terbesar).
+    -   Melayani tamu dengan sifat **'Penyebar Penyakit'**.
+    -   Setiap sesi yang dilakukan saat agensi berada dalam status **"Dalam Pengawasan"**.
 -   **Proses**: Ini adalah peristiwa katastrofik yang tidak bisa dicegah. Modal **Penggerebekan Polisi** akan muncul saat `endDay`.
 -   **Konsekuensi (Bencana)**:
     -   Sebagian besar **Uang Kas dan Tabungan disita**.

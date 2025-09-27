@@ -28,6 +28,7 @@ export interface GameStoreState {
   loading: boolean;
   loadingProgress: number;
   loadingMessage: string;
+  loadingError: string | null;
   isProcessing: boolean;
   sessionProgress: { narrative: string[]; duration: number } | null;
   isSessionProcessingComplete: boolean;

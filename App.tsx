@@ -12,6 +12,7 @@ const App: React.FC = () => {
   const loading = useGameStore((state) => state.loading);
   const loadingProgress = useGameStore((state) => state.loadingProgress);
   const loadingMessage = useGameStore((state) => state.loadingMessage);
+  const loadingError = useGameStore((state) => state.loadingError);
   const activeView = useGameStore((state) => state.activeView);
   const { loadGameData } = useGameStore.getState();
 
@@ -32,32 +33,43 @@ const App: React.FC = () => {
           style={{ objectFit: 'cover' }}
         />
         <div className="relative z-10 flex flex-col items-center justify-center p-8 text-center text-white bg-black/60 backdrop-blur-sm rounded-2xl w-full max-w-sm">
-          <img
-            src="https://raw.githubusercontent.com/nadirasetya13-code/asset-profile/refs/heads/Game/icon/Tittle.jpg"
-            alt="ASRAMA BIRAHI"
-            className="object-contain h-12 mb-6 shadow-lg animate-pulse"
-            style={{ animationDuration: '3s' }}
-          />
-          <div className="w-full h-4 mt-4 rounded-full shadow-inner bg-black/50">
-            <motion.div
-              className="h-4 rounded-full bg-gradient-to-r from-brand-pink to-brand-purple"
-              initial={{ width: 0 }}
-              animate={{ width: `${loadingProgress}%` }}
-              transition={{ duration: 0.5, ease: 'easeInOut' }}
-            />
-          </div>
-          <p
-            className="mt-2 text-sm font-semibold text-white"
-            style={{ textShadow: '0 1px 2px rgba(0,0,0,0.5)' }}
-          >
-            Memuat Aset... {Math.round(loadingProgress)}%
-          </p>
-          <p
-            className="mt-1 text-xs text-gray-300 truncate w-full max-w-xs px-2"
-            style={{ textShadow: '0 1px 2px rgba(0,0,0,0.5)' }}
-          >
-            {loadingMessage}
-          </p>
+          {loadingError ? (
+            <div className="text-red-400">
+              <h2 className="text-lg font-bold">Terjadi Kesalahan</h2>
+              <p className="mt-2 text-sm">{loadingError}</p>
+            </div>
+          ) : (
+            <>
+              <img
+                src="https://raw.githubusercontent.com/nadirasetya13-code/asset-profile/refs/heads/Game/icon/Tittle.jpg"
+                alt="ASRAMA BIRAHI"
+                className="object-contain h-12 mb-6 shadow-lg animate-pulse"
+                style={{ animationDuration: '3s' }}
+              />
+              <div className="w-full h-4 mt-4 rounded-full shadow-inner bg-black/50">
+                <motion.div
+                  className="h-4 rounded-full bg-gradient-to-r from-brand-pink to-brand-purple"
+                  initial={{ width: 0 }}
+                  animate={{ width: `${loadingProgress}%` }}
+                  transition={{ duration: 0.5, ease: 'easeInOut' }}
+                />
+              </div>
+              <p
+                className="mt-2 text-sm font-semibold text-white"
+                style={{ textShadow: '0 1px 2px rgba(0,0,0,0.5)' }}
+              >
+                {loadingProgress < 100
+                  ? `Memuat Aset... ${Math.round(loadingProgress)}%`
+                  : 'Selesai!'}
+              </p>
+              <p
+                className="mt-1 text-xs text-gray-300 truncate w-full max-w-xs px-2"
+                style={{ textShadow: '0 1px 2px rgba(0,0,0,0.5)' }}
+              >
+                {loadingMessage}
+              </p>
+            </>
+          )}
         </div>
       </div>
     );

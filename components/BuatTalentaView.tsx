@@ -1,9 +1,18 @@
 import React, { useState, useMemo, useCallback } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useGameStore } from '../controllers/gameController';
-import { BaseTalent, Rarity } from '../types';
-import { TALENT_ATTRIBUTE_BUDGET, RARITY_CONFIG } from '../constants';
-import { CreateIcon, LoadingSpinner } from './icons';
+import { BaseTalent, Rarity, Talent } from '../types';
+import {
+  TALENT_CREATOR_RARITY_STAT_CAP,
+  YEARLY_XP_TO_NEXT_AGE,
+  RARITY_CONFIG,
+} from '../constants';
+import { CreateIcon, LoadingSpinner, MagicWandIcon } from './icons';
+import {
+  calculateDayaPikat,
+  calculateExpToNextLevel,
+} from '../services/localDataService';
+import { GoogleGenAI } from '@google/genai';
 
 const initialTalentState: Omit<BaseTalent, 'id'> = {
   name: '',
@@ -90,12 +99,16 @@ const attributeList = [
     { path: 'intim.anal.sensitivitasAnal', label: 'Anal: Sensitivitas Anal' },
     { path: 'intim.mulut.keterampilanLidah', label: 'Mulut: Keterampilan Lidah' },
     { path: 'intim.mulut.kedalamanTenggorokan', label: 'Mulut: Kedalaman Tenggorokan' },
-    { path: 'intim.mulut.produksiSaliva', label: 'Mulut: Produksi Saliva' },
+    { path: 'intim.mulut.produksialiva', label: 'Mulut: Produksi Saliva' },
     { path: 'intim.bokong.bentukPantat', label: 'Bokong: Bentuk Pantat' },
     { path: 'intim.bokong.kekencangan', label: 'Bokong: Kekencangan' },
     { path: 'intim.bokong.kehalusanKulit', label: 'Bokong: Kehalusan Kulit' },
     { path: 'intim.bokong.responSpank', label: 'Bokong: Respon Spank' },
 ];
+
+const getAttributeValue = (obj: any, path: string) => {
+    return path.split('.').reduce((o, k) => (o ? o[k] : 0), obj);
+};
 
 const BuatTalentaView: React.FC = () => {
     const { saveCreatedTalent } = useGameStore.getState();
@@ -103,38 +116,82 @@ const BuatTalentaView: React.FC = () => {
     const [talent, setTalent] = useState(initialTalentState);
     const [isSaved, setIsSaved] = useState(false);
     const [saveError, setSaveError] = useState<string | null>(null);
+    const [isAiGenerating, setIsAiGenerating] = useState(false);
+    const [aiError, setAiError] = useState<string | null>(null);
+
+    const rarityConfig = RARITY_CONFIG[talent.rarity];
+    const statCap = TALENT_CREATOR_RARITY_STAT_CAP[talent.rarity];
 
     const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
         const { name, value } = e.target;
-        setTalent(prev => ({ ...prev, [name]: value }));
+        if (name === 'rarity') {
+            // Reset all numeric stats when rarity changes to enforce new caps and budgets
+            setTalent(prev => ({
+                ...initialTalentState,
+                // Keep the text fields the user has already entered
+                name: prev.name,
+                kotaAsal: prev.kotaAsal,
+                agama: prev.agama,
+                statusSosial: prev.statusSosial,
+                cerita: prev.cerita,
+                imageUrl: prev.imageUrl,
+                // Set the new rarity
+                rarity: value as Rarity,
+            }));
+        } else {
+            setTalent(prev => ({ ...prev, [name]: value }));
+        }
     };
     
     const { totalPointsUsed, budget, remainingPoints } = useMemo(() => {
-        const budget = TALENT_ATTRIBUTE_BUDGET[talent.rarity];
+        const totalPossiblePoints = statCap * attributeList.length;
+        const budget = Math.floor(totalPossiblePoints / 2) + 8;
+        
         let used = 0;
-        const numericAttributes = [
-            talent.stamina, talent.popularitas, talent.kecantikan, talent.mental,
-            ...Object.values(talent.fisik), ...Object.values(talent.intim.payudara),
-            ...Object.values(talent.intim.vagina), ...Object.values(talent.intim.klitoris),
-            ...Object.values(talent.intim.anal), ...Object.values(talent.intim.mulut),
-            ...Object.values(talent.intim.bokong), talent.potensiHIVAIDS, talent.kesehatan,
-            talent.jatuhCinta, talent.potensiHamil
-        ];
-        used = numericAttributes.reduce((sum, val) => sum + (Number(val) || 0), 0);
+        attributeList.forEach(attr => {
+            used += getAttributeValue(talent, attr.path);
+        });
+        
         return { totalPointsUsed: used, budget, remainingPoints: budget - used };
+    }, [talent, statCap]);
+    
+    const dayaPikat = useMemo(() => {
+        // Construct a temporary full talent object for calculation, assuming it's a "newborn" talent.
+        const tempTalentForCalc: Omit<Talent, 'dayaPikat' | 'tariffs'> = {
+            ...talent,
+            id: 'temp-creation-id',
+            age: 17,
+            level: 1,
+            experience: 0,
+            experienceToNextLevel: calculateExpToNextLevel(1),
+            yearlyExperience: 0,
+            yearlyExperienceToNextAge: YEARLY_XP_TO_NEXT_AGE,
+            currentEnergy: talent.stamina,
+            skills: [],
+            followers: 0,
+            sessionsServed: 0,
+            photoInventory: [],
+            videoInventory: [],
+            isDeceased: false,
+            isOnContraceptives: false,
+            hasMastery: false,
+            hibernationEndTime: undefined,
+            unavailabilityReason: undefined,
+            unavailableUntil: undefined,
+            earnings: 0
+        };
+        return calculateDayaPikat(tempTalentForCalc);
     }, [talent]);
 
-    const handleSliderChange = (path: string, value: number) => {
-        const getAttributeValue = (obj: any, path: string) => path.split('.').reduce((o, k) => o?.[k], obj);
-        
+    const handleSliderChange = useCallback((path: string, value: number) => {
         const currentValue = getAttributeValue(talent, path) as number;
         const delta = value - currentValue;
 
-        if (delta > 0) {
-            if (delta > remainingPoints) {
-                value = currentValue + remainingPoints;
-            }
+        if (delta > 0 && delta > remainingPoints) {
+            value = currentValue + remainingPoints;
         }
+
+        const finalValue = Math.min(value, statCap);
 
         setTalent(prev => {
             const keys = path.split('.');
@@ -143,14 +200,125 @@ const BuatTalentaView: React.FC = () => {
             for (let i = 0; i < keys.length - 1; i++) {
                 current = current[keys[i]];
             }
-            current[keys[keys.length - 1]] = value;
+            current[keys[keys.length - 1]] = finalValue;
             return newTalent;
         });
-    };
+    }, [remainingPoints, statCap, talent]);
     
+    const handleGenerateAttributes = useCallback(() => {
+        const statCap = TALENT_CREATOR_RARITY_STAT_CAP[talent.rarity];
+        const numAttributes = attributeList.length;
+        const totalPossiblePoints = statCap * numAttributes;
+        const budget = Math.floor(totalPossiblePoints / 2) + 8;
+        
+        const points = new Array(numAttributes).fill(0);
+        
+        let pointsToDistribute = budget;
+        while(pointsToDistribute > 0) {
+            const randomIndex = Math.floor(Math.random() * numAttributes);
+            if (points[randomIndex] < statCap) {
+                points[randomIndex]++;
+                pointsToDistribute--;
+            }
+        }
+        
+        const newTalentState = {
+            ...initialTalentState,
+            name: talent.name,
+            kotaAsal: talent.kotaAsal,
+            agama: talent.agama,
+            statusSosial: talent.statusSosial,
+            cerita: talent.cerita,
+            imageUrl: talent.imageUrl,
+            rarity: talent.rarity,
+        };
+        
+        attributeList.forEach(({ path }, index) => {
+            const keys = path.split('.');
+            // eslint-disable-next-line @typescript-eslint/no-explicit-any
+            let current = newTalentState as any;
+            for (let i = 0; i < keys.length - 1; i++) {
+                current = current[keys[i]];
+            }
+            current[keys[keys.length - 1]] = points[index];
+        });
+    
+        setTalent(newTalentState);
+    }, [talent.rarity, talent.name, talent.kotaAsal, talent.agama, talent.statusSosial, talent.cerita, talent.imageUrl]);
+    
+    const handleGenerateStory = useCallback(async () => {
+        if (!talent.cerita.trim() || isAiGenerating) return;
+
+        setIsAiGenerating(true);
+        setAiError(null);
+
+        try {
+            const ai = new GoogleGenAI({ apiKey: process.env.API_KEY! });
+            
+            const allAttributes = attributeList.map(attr => ({
+                label: attr.label,
+                value: getAttributeValue(talent, attr.path)
+            })).sort((a, b) => b.value - a.value);
+
+            const topAttributes = allAttributes.slice(0, 5).map(a => `${a.label}: ${a.value}`);
+            const bottomAttributes = allAttributes.slice(-5).map(a => `${a.label}: ${a.value}`);
+
+            const detailedPrompt = `
+                Tugasmu adalah mengembangkan ide cerita untuk talenta di game dewasa 'ASRAMA BIRAHI'.
+                Berikut adalah detail talenta:
+                - Nama: ${talent.name || 'Belum ditentukan'}
+                - Kota Asal: ${talent.kotaAsal || 'Belum ditentukan'}
+                - Status Sosial: ${talent.statusSosial || 'Belum ditentukan'}
+                - Rarity: ${talent.rarity}
+                - Ide Cerita Awal dari User: "${talent.cerita}"
+                - Atribut Terkuat: ${topAttributes.join(', ')}
+                - Atribut Terlemah: ${bottomAttributes.join(', ')}
+
+                Kembangkan ide cerita awal menjadi latar belakang yang lengkap, vulgar, dan eksplisit sesuai tema game (gelap, realistis, modern Indonesia).
+                Cerita harus mencakup deskripsi fisik yang detail dan sensual, yang secara logis mencerminkan atribut terkuat dan terlemah di atas.
+                Pastikan bahasa yang digunakan lugas dan tanpa sensor.
+                Hanya berikan teks ceritanya saja dalam Bahasa Indonesia.
+            `;
+
+            const systemInstruction = `You are a creative writer for an adult simulation game called 'ASRAMA BIRAHI'. The game's tone is explicit, dark, realistic, and vulgar, with a modern Indonesian setting. Your task is to expand a user's short idea into a full, rich, and explicit backstory for a female talent, based on the detailed profile provided. The backstory must include a detailed physical description that justifies her potential stats. The narrative must be mature, provocative, and consistent with the game's themes. DO NOT use pleasantries or introductory phrases like 'Tentu,' or 'Berikut adalah...'. Respond only with the generated story text in Bahasa Indonesia.`;
+
+            const response = await ai.models.generateContent({
+                model: 'gemini-2.5-flash',
+                contents: detailedPrompt,
+                config: {
+                    systemInstruction,
+                },
+            });
+
+            const generatedStory = response.text;
+            setTalent(prev => ({ ...prev, cerita: generatedStory }));
+
+        } catch (error) {
+            console.error("AI story generation failed:", error);
+            setAiError("Gagal menghasilkan cerita. Coba lagi nanti.");
+        } finally {
+            setIsAiGenerating(false);
+        }
+    }, [isAiGenerating, talent]);
+
+    const handleImageUpload = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
+        const file = e.target.files?.[0];
+        if (file) {
+            if (file.size > 2 * 1024 * 1024) { // 2MB limit
+                alert("Ukuran file terlalu besar. Maksimal 2MB.");
+                return;
+            }
+            const reader = new FileReader();
+            reader.onloadend = () => {
+                setTalent(prev => ({ ...prev, imageUrl: reader.result as string }));
+            };
+            reader.readAsDataURL(file);
+        }
+    }, []);
+
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
-        if (remainingPoints !== 0 || isProcessing || isSaved) return;
+        if (remainingPoints < 0 || isProcessing || isSaved) return; // Prevent saving if over budget
         setSaveError(null);
         try {
             await saveCreatedTalent(talent as BaseTalent);
@@ -172,51 +340,122 @@ const BuatTalentaView: React.FC = () => {
             <h2 className="mb-3 text-xl font-serif text-center text-light-text">Buat Talenta Kustom</h2>
             <form onSubmit={handleSubmit} className="max-w-2xl mx-auto space-y-4">
                 
-                {/* --- Point Budget Tracker --- */}
-                <div className="sticky top-[45px] z-10 p-2 bg-dark-secondary/80 backdrop-blur-md rounded-lg border border-white/10">
+                {/* Image Preview */}
+                <AnimatePresence>
+                    {talent.imageUrl && (
+                        <motion.div
+                            initial={{ opacity: 0, scale: 0.8 }}
+                            animate={{ opacity: 1, scale: 1 }}
+                            exit={{ opacity: 0, scale: 0.8 }}
+                            className="flex justify-center mb-4"
+                        >
+                            <div className={`relative w-40 h-72 rounded-xl shadow-lg border-2 overflow-hidden bg-dark-secondary ${rarityConfig.border} ${rarityConfig.glowAnimation}`}>
+                                <img src={talent.imageUrl} alt="Pratinjau Talenta" className="object-cover w-full h-full" />
+                                <div className="absolute inset-0 bg-gradient-to-t from-black/80 to-transparent" />
+                                <div className="absolute bottom-0 w-full p-2 text-center text-white">
+                                    <h3 className="text-lg font-bold font-serif drop-shadow-lg">{talent.name || 'Nama Talenta'}</h3>
+                                    <p className={`text-sm font-semibold drop-shadow-md ${rarityConfig.color}`}>{talent.rarity}</p>
+                                </div>
+                            </div>
+                        </motion.div>
+                    )}
+                </AnimatePresence>
+
+                {/* --- Daya Pikat & Point Budget Tracker --- */}
+                <div className="sticky top-[45px] z-10 p-2 bg-dark-secondary/80 backdrop-blur-md rounded-lg border border-white/10 space-y-2">
+                    {/* Daya Pikat Display */}
                     <div className="flex justify-between items-center text-sm">
-                        <span className="font-bold">Poin Atribut:</span>
-                        <span className={`font-bold ${budgetStatusColor}`}>{remainingPoints} / {budget}</span>
+                        <span className="font-bold">Total Daya Pikat:</span>
+                        <span className="font-bold text-brand-gold text-lg">{dayaPikat}</span>
                     </div>
-                    <div className="w-full h-2 mt-1 bg-black/30 rounded-full">
-                        <div className="h-2 bg-brand-purple rounded-full transition-all" style={{ width: `${(totalPointsUsed / budget) * 100}%` }}></div>
+                    {/* Point Budget Tracker */}
+                    <div>
+                        <div className="flex justify-between items-center text-sm">
+                            <span className="font-bold">Poin Atribut Digunakan:</span>
+                            <span className={`font-bold ${budgetStatusColor}`}>{totalPointsUsed} / {budget}</span>
+                        </div>
+                        <div className="w-full h-2 mt-1 bg-black/30 rounded-full">
+                            <div className="h-2 bg-brand-purple rounded-full transition-all" style={{ width: `${(totalPointsUsed / budget) * 100}%` }}></div>
+                        </div>
                     </div>
                 </div>
 
                 {/* --- Basic Info --- */}
                 <div className="p-3 space-y-2 rounded-xl shadow-lg bg-black/20">
                      <input name="name" value={talent.name} onChange={handleInputChange} placeholder="Nama Talenta" required className="w-full p-2 bg-dark-tertiary rounded"/>
-                     <input name="imageUrl" value={talent.imageUrl} onChange={handleInputChange} placeholder="URL Gambar" required className="w-full p-2 bg-dark-tertiary rounded"/>
-                     <textarea name="cerita" value={talent.cerita} onChange={handleInputChange} placeholder="Cerita Latar Belakang" required rows={4} className="w-full p-2 bg-dark-tertiary rounded"/>
+                     
+                     <div className="flex gap-2 items-center">
+                        <input name="imageUrl" value={talent.imageUrl} onChange={handleInputChange} placeholder="URL Gambar atau Unggah Lokal" required className="flex-grow p-2 bg-dark-tertiary rounded"/>
+                        <label htmlFor="local-image-upload" className="flex-shrink-0 px-4 py-2 text-sm font-bold text-white bg-blue-600 rounded-lg cursor-pointer hover:bg-blue-700">
+                            Unggah File
+                        </label>
+                        <input
+                            id="local-image-upload"
+                            type="file"
+                            accept="image/png, image/jpeg, image/webp"
+                            onChange={handleImageUpload}
+                            className="hidden"
+                        />
+                     </div>
+
+                    <div className="relative">
+                        <textarea 
+                            name="cerita" 
+                            value={talent.cerita} 
+                            onChange={handleInputChange} 
+                            placeholder="Tulis ide singkat di sini (contoh: 'Gadis desa polos yang terpaksa ke kota')..." 
+                            required 
+                            rows={4} 
+                            className="w-full p-2 pr-12 bg-dark-tertiary rounded"
+                        />
+                        <button
+                            type="button"
+                            onClick={handleGenerateStory}
+                            disabled={isAiGenerating || !talent.cerita.trim()}
+                            className="absolute top-2 right-2 p-1.5 rounded-full bg-purple-600 hover:bg-purple-700 disabled:bg-gray-500 disabled:cursor-not-allowed transition-colors"
+                            title="Buat Cerita dengan AI"
+                            aria-label="Buat Cerita dengan AI"
+                        >
+                            {isAiGenerating ? <LoadingSpinner className="w-5 h-5"/> : <MagicWandIcon className="w-5 h-5"/>}
+                        </button>
+                    </div>
+                    {aiError && <p className="text-xs font-bold text-center text-red-500">{aiError}</p>}
                      <div className="grid grid-cols-2 gap-2">
                         <input name="kotaAsal" value={talent.kotaAsal} onChange={handleInputChange} placeholder="Kota Asal" required className="p-2 bg-dark-tertiary rounded"/>
                         <input name="agama" value={talent.agama} onChange={handleInputChange} placeholder="Agama" required className="p-2 bg-dark-tertiary rounded"/>
                         <input name="statusSosial" value={talent.statusSosial} onChange={handleInputChange} placeholder="Status Sosial" required className="p-2 bg-dark-tertiary rounded"/>
                         <select name="rarity" value={talent.rarity} onChange={handleInputChange} className="p-2 bg-dark-tertiary rounded">
-                            {(Object.keys(TALENT_ATTRIBUTE_BUDGET) as Rarity[]).map(r => <option key={r} value={r}>{r}</option>)}
+                            {(Object.keys(TALENT_CREATOR_RARITY_STAT_CAP) as Rarity[]).map(r => <option key={r} value={r}>{r}</option>)}
                         </select>
                      </div>
                 </div>
 
                 {/* --- Attributes --- */}
                 <div className="p-3 space-y-3 rounded-xl shadow-lg bg-black/20">
-                    <h3 className="text-center font-serif">Atribut</h3>
+                     <button
+                        type="button"
+                        onClick={handleGenerateAttributes}
+                        className="w-full flex items-center justify-center gap-2 py-2 mb-3 font-bold text-white rounded-lg bg-gradient-to-r from-teal-500 to-cyan-500 hover:scale-105 transition-transform"
+                    >
+                        🎲 Generate Atribut Acak
+                    </button>
+                    <h3 className="text-center font-serif">Atribut (Max per stat: {statCap})</h3>
                     {attributeList.map(({ path, label }) => {
-                        const value = path.split('.').reduce((o, k) => (o as any)?.[k], talent) as number;
+                        const value = path.split('.').reduce((o, k) => (o as any)?.[k] || 0, talent) as number;
                         return (
                             <div key={path}>
                                 <label className="flex justify-between text-xs">
                                     <span>{label}</span>
                                     <span className="font-bold">{value}</span>
                                 </label>
-                                <input type="range" min="0" max="100" value={value} onChange={(e) => handleSliderChange(path, parseInt(e.target.value, 10))} className="w-full" />
+                                <input type="range" min="0" max={statCap} value={value} onChange={(e) => handleSliderChange(path, parseInt(e.target.value, 10))} className="w-full" />
                             </div>
                         );
                     })}
                 </div>
                 
-                <button type="submit" disabled={remainingPoints !== 0 || isProcessing || isSaved} className="w-full py-3 font-bold text-white rounded-lg bg-gradient-to-r from-green-500 to-blue-500 disabled:from-gray-500 disabled:to-gray-600 disabled:cursor-not-allowed">
-                    {isProcessing ? <LoadingSpinner className="w-6 h-6 mx-auto"/> : isSaved ? 'Talenta Disimpan!' : remainingPoints !== 0 ? `Sisa Poin: ${remainingPoints}` : 'Simpan Talenta'}
+                <button type="submit" disabled={remainingPoints < 0 || isProcessing || isSaved} className="w-full py-3 font-bold text-white rounded-lg bg-gradient-to-r from-green-500 to-blue-500 disabled:from-gray-500 disabled:to-gray-600 disabled:cursor-not-allowed">
+                    {isProcessing ? <LoadingSpinner className="w-6 h-6 mx-auto"/> : isSaved ? 'Talenta Disimpan!' : remainingPoints < 0 ? 'Poin Melebihi Batas!' : `Simpan (Sisa Poin: ${remainingPoints})`}
                 </button>
                 {isSaved && <p className="text-sm text-center text-green-400">Talenta barumu akan tersedia di Gacha setelah memuat ulang game.</p>}
                 {saveError && <p className="mt-2 text-sm font-bold text-center text-red-500">{saveError}</p>}

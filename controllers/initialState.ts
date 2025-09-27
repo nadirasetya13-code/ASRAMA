@@ -6,6 +6,7 @@ export const initialState: GameStoreState = {
   loading: true,
   loadingProgress: 0,
   loadingMessage: 'Mempersiapkan...',
+  loadingError: null,
   isProcessing: false,
   sessionProgress: null,
   isSessionProcessingComplete: false,

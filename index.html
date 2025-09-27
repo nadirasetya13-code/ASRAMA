@@ -11,7 +11,7 @@
     <meta name="theme-color" content="#1e1c2f" />
     <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>💖</text></svg>">
 
-    <script src="https://cdn.tailwindcss.com?plugins=forms,typography,aspect-ratio"></script>
+    <script src="https://cdn.tailwindcss.com"></script>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700&family=Montserrat:wght@400;500;700&display=swap" rel="stylesheet">
@@ -134,6 +134,22 @@
         }
       }
     </script>
+  <script type="importmap">
+{
+  "imports": {
+    "react": "https://aistudiocdn.com/react@^19.1.1",
+    "react-dom/": "https://aistudiocdn.com/react-dom@^19.1.1/",
+    "react/": "https://aistudiocdn.com/react@^19.1.1/",
+    "idb": "https://cdn.jsdelivr.net/npm/idb@7/build/index.js",
+    "zustand": "https://aistudiocdn.com/zustand@^4.5.4",
+    "framer-motion": "https://cdn.jsdelivr.net/npm/framer-motion@11.2.10/dist/es/index.mjs",
+    "@testing-library/jest-dom": "https://aistudiocdn.com/@testing-library/jest-dom@^6.8.0",
+    "vitest": "https://aistudiocdn.com/vitest@^3.2.4",
+    "vitest/": "https://aistudiocdn.com/vitest@^3.2.4/",
+    "@google/genai": "https://aistudiocdn.com/@google/genai@^1.21.0"
+  }
+}
+</script>
 </head>
   <body class="bg-dark-primary font-sans text-light-text">
     <div id="root"></div>
@@ -142,6 +158,6 @@
         <p>Anda perlu mengaktifkan JavaScript untuk menjalankan aplikasi ini. Silakan aktifkan JavaScript di pengaturan browser Anda.</p>
       </div>
     </noscript>
-    <script type="module" src="/index.tsx"></script>
+    <script type="module" src="./index.tsx"></script>
   </body>
 </html>

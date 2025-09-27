@@ -88,3 +88,14 @@ export const ChevronDownIcon = ({ className }: { className?: string }) => (
         <path d="m6 9 6 6 6-6"/>
     </svg>
 );
+
+export const MagicWandIcon = ({ className }: { className?: string }) => (
+    <svg xmlns="http://www.w3.org/2000/svg" className={className} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+      <path d="M5 3v4" />
+      <path d="M19 17v4" />
+      <path d="M3 5h4" />
+      <path d="M17 19h4" />
+      <path d="M12 3L2 13l9 9 9-9-9-9" />
+      <path d="M12 21L2 11" />
+    </svg>
+);
